@@ -8,7 +8,20 @@ import re
 from datetime import date, datetime
 
 
-def get_a_turtle_color():
+def random_color_picker():
+    def give_random_color():
+        return random.randint(0, 255)
+
+    r = give_random_color()
+    g = give_random_color()
+    b = give_random_color()
+    return r, g, b
+
+
+def get_turtle_color_or_colors(type):
+    if type not in ["color", "colors"]:
+        raise Exception(f"{type} is an invalid parameter. Try 'color' or 'colors' as parameters")
+
     def get_images() -> list[str]:
         response = requests.get("https://cs111.wellesley.edu/labs/lab02/colors")
         response.raise_for_status()
@@ -52,18 +65,22 @@ def get_a_turtle_color():
             file.write(f"{date.today()}\n")
             file.writelines([f"{line}\n" for line in process_text_of_images()])
 
-    def pick_a_random_color():
+    def pick_color_or_colors():
         with open("colors.txt", "r") as file:
             date_in_str = file.readline().strip()
-            if datetime.strptime(date_in_str, "%Y-%m-%d").date() == date.today():
-                all_colors = file.readlines()[0:]
-                return_color = random.choice(all_colors)
-                return return_color.strip()
-            else:
+            try:
+                if datetime.strptime(date_in_str, "%Y-%m-%d").date() == date.today():
+                    all_colors = file.readlines()[0:]
+                    if type == "color":
+                        return_color = random.choice(all_colors)
+                        return return_color.strip()
+                    else:
+                        return [color.strip() for color in all_colors]
+            except:
                 write_colors_to_file()
-                pick_a_random_color()
+                return pick_color_or_colors()
 
-    return pick_a_random_color()
+    return pick_color_or_colors()
 
 
-print(get_a_turtle_color())
+get_turtle_color_or_colors("color")
